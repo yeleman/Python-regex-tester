@@ -6,21 +6,24 @@
 # the code base itself has been made to be run on host with Python 2.6
 
 import re
-import sys
+#import sys
 import os
-import webbrowser
+#import webbrowser
 import json
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'libs'))
+print('file: %s' % __file__)
+print('ROOT_DIR: %s' %ROOT_DIR)
+
+#sys.path.insert(0, os.path.join(ROOT_DIR, 'libs'))
 
 from pprint import pformat
 from operator import or_
 
 import bottle
-from bottle import get, post, request, route, run, view, static_file
+from bottle import get, post, request, route, view, static_file
 
-DEBUG = False
+bottle.TEMPLATE_PATH.insert(0, os.path.join(ROOT_DIR, 'views'))
 
 CODES = {
     'search': """re.search(%(is_unicode)s%(is_raw)s'''%(regex)s''', %(is_unicode)s'''%(text)s'''%(flags_param)s)""",
@@ -59,7 +62,7 @@ DEFAULT = {
 
 @get('/')
 @view('index')
-def index():
+def index_get():
     ctx = dict(DEFAULT)
     ctx.update(dict((flag, False) for flag in FLAGS))
     return ctx
@@ -67,7 +70,7 @@ def index():
 
 @post('/')
 @view('index')
-def index():
+def index_post():
 
     forms = request.forms
     ctx = dict(DEFAULT)
@@ -146,11 +149,3 @@ def index():
 @route('/static/<filename>')
 def server_static(filename):
     return static_file(filename, root=os.path.join(ROOT_DIR, 'static'))
-
-if __name__ == "__main__":
-    if DEBUG:
-        bottle.debug(True)
-        run(host='localhost', port=9999, reloader=True)
-    else:
-        webbrowser.open('http://127.0.0.1:9999/')
-        run(host='localhost', port=9999)
